@@ -1,6 +1,6 @@
 cask "voicely" do
-  version "1.4.2,92c58814c0ba,7ac3d947ff943e0816253c786058b9a07b94151bfb3c0fe696cc6929ec64b2be"
-  sha256 "7ac3d947ff943e0816253c786058b9a07b94151bfb3c0fe696cc6929ec64b2be"
+  version "1.4.4,76daae3718df,4bc1c044508b99deecef0942f8b1dc181fdae5bf146a6eb140cc20c6fabcca86"
+  sha256 "4bc1c044508b99deecef0942f8b1dc181fdae5bf146a6eb140cc20c6fabcca86"
 
   url "https://voicely.art/Voicely-#{version.csv.first}-#{version.csv.second}-#{version.csv.third}.dmg"
   name "Voicely"
