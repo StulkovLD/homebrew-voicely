@@ -1,0 +1,33 @@
+name: bump
+# Follows the release pipeline: voicely.art/install.sh is generated per release
+# and names the current DMG and its SHA-256. When it changes, the cask follows.
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read current release from install.sh
+        run: |
+          set -eu
+          curl -fsSL https://voicely.art/install.sh -o install.sh
+          VERSION=$(sed -n 's/^VERSION="\([0-9.]*\)"$/\1/p' install.sh)
+          DMG=$(sed -n 's/^DMG_FILE="\(Voicely-[^"]*\.dmg\)"$/\1/p' install.sh)
+          SHA=$(sed -n 's/^EXPECTED_SHA256="\([0-9a-f]\{64\}\)"$/\1/p' install.sh)
+          TAG=${DMG#"Voicely-${VERSION}-"}; TAG=${TAG%.dmg}
+          COMMIT=${TAG%%-*}
+          [ -n "$VERSION" ] && [ -n "$COMMIT" ] && [ "${TAG#*-}" = "$SHA" ] || { echo "install.sh format changed"; exit 1; }
+          curl -fsSL "https://voicely.art/$DMG" -o v.dmg
+          echo "$SHA  v.dmg" | sha256sum -c -
+          sed -i -E "s/^  version \".*\"/  version \"${VERSION},${COMMIT},${SHA}\"/; s/^  sha256 \".*\"/  sha256 \"${SHA}\"/" Casks/voicely.rb
+          rm -f install.sh v.dmg
+          if git diff --quiet; then echo "up to date"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "voicely ${VERSION}"
+          git push
