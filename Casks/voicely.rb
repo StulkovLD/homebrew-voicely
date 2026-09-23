@@ -16,23 +16,18 @@ cask "voicely" do
   end
 
   depends_on arch: :arm64
-  depends_on macos: ">= :sonoma"
+  depends_on macos: :sonoma
 
   app "Voicely.app"
   binary "#{appdir}/Voicely.app/Contents/Helpers/voicely"
 
-  # The public build is ad-hoc signed and not notarized. This mirrors the
-  # official installer (https://voicely.art/install.sh): the hash above pins
-  # the exact DMG, then the quarantine flag is cleared on that bundle only and
-  # Voicely's own permission grants are reset, because the ad-hoc code
-  # identity changes between releases.
-  postflight do
-    system_command "/usr/bin/xattr",
-                   args:         ["-dr", "com.apple.quarantine", "#{appdir}/Voicely.app"],
-                   must_succeed: false
-    system_command "/usr/bin/tccutil",
-                   args:         ["reset", "All", "art.voicely.app"],
-                   must_succeed: false
+  # The public build is ad-hoc signed and not notarized. As the official
+  # installer (https://voicely.art/install.sh) does, the sha256 above pins the
+  # exact DMG and the quarantine flag is cleared on that bundle only.
+  postflight_steps do
+    run "/usr/bin/xattr",
+        args:         ["-dr", "com.apple.quarantine", "{{appdir}}/Voicely.app"],
+        must_succeed: false
   end
 
   uninstall quit: "art.voicely.app"
@@ -49,8 +44,11 @@ cask "voicely" do
   caveats <<~EOS
     Voicely is ad-hoc signed and not notarized by Apple. On first launch,
     approve Microphone and Accessibility; the speech model (~470 MB) is
-    downloaded once, on-device. After each upgrade macOS asks for those
-    permissions again.
+    downloaded once, on-device.
+
+    The ad-hoc code identity changes with every release. After an upgrade,
+    reset the old grants so macOS asks again cleanly:
+      tccutil reset All art.voicely.app
 
     Connect it to your AI agents (Claude Code, Codex, Cursor, ...):
       voicely connect

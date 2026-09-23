@@ -8,6 +8,6 @@ brew install --cask stulkovld/voicely/voicely
 
 Requires macOS 14+ on Apple Silicon. The cask installs `Voicely.app` and puts the `voicely` CLI on your PATH; then run `voicely connect` to register the MCP server with your agents.
 
-The build is ad-hoc signed and not notarized. Like the official installer (`curl -fsSL https://voicely.art/install.sh | sh`), the cask pins the DMG by SHA-256, clears the quarantine flag on that bundle only and resets Voicely's own permission grants, so macOS asks for Microphone and Accessibility again after each upgrade.
+The build is ad-hoc signed and not notarized. Like the official installer (`curl -fsSL https://voicely.art/install.sh | sh`), the cask pins the DMG by SHA-256 and clears the quarantine flag on that bundle only. The code identity changes with every release, so after `brew upgrade` run `tccutil reset All art.voicely.app` and approve Microphone and Accessibility again (Homebrew's sandbox does not let a cask do this for you; the curl installer does it automatically).
 
 Upgrade: `brew upgrade --cask voicely`. Remove: `brew uninstall --cask voicely` (add `--zap` to also delete settings; transcripts in `~/Documents/Voicely` are always kept).
